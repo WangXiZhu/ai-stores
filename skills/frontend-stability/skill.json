@@ -1,0 +1,28 @@
+{
+  "name": "frontend-stability",
+  "version": "1.0.0",
+  "description": "前端代码稳定性审查与缺陷预防专家。当用户要求测试检查、寻找边界场景、排错、优化稳定性或 Review 代码缺陷时触发，专注于防范白屏、无限循环、状态死锁等高频前端 Bug。",
+  "author": "WangXiZhu",
+  "keywords": [
+    "frontend",
+    "stability",
+    "code-review",
+    "bug-prevention",
+    "react",
+    "taro",
+    "edge-cases",
+    "robustness"
+  ],
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "platforms": ["accio", "claude", "gemini"],
+  "triggers": [
+    "测试检查",
+    "寻找边界场景",
+    "排错",
+    "优化稳定性",
+    "Review代码缺陷",
+    "帮我review",
+    "检查这段代码"
+  ]
+}

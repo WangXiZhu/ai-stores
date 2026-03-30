@@ -1,0 +1,32 @@
+{
+  "name": "react-taro-figma-ui",
+  "version": "1.0.0",
+  "description": "视觉1:1还原助手。根据开发者提供的 Figma 链接，通过 Figma MCP 工具解析原始数据，直接转换为 React (Web) 或 Taro (小程序) + SCSS 高保真代码。当用户提供 Figma 链接/节点要求写前端页面或组件时触发。",
+  "author": "WangXiZhu",
+  "keywords": [
+    "figma",
+    "ui",
+    "design-to-code",
+    "react",
+    "taro",
+    "mini-program",
+    "pixel-perfect",
+    "scss",
+    "frontend"
+  ],
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "platforms": ["accio", "claude", "gemini"],
+  "triggers": [
+    "还原Figma",
+    "Figma链接",
+    "figma.com",
+    "设计稿转代码",
+    "写前端页面",
+    "1:1还原",
+    "切图"
+  ],
+  "requirements": {
+    "mcp": ["figma"]
+  }
+}

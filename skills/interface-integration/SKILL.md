@@ -1,5 +1,5 @@
 ---
-name: api-integration
+name: interface-integration
 description: 前后端接口对接与 TypeScript 类型生成/JSDoc 声明助手。当用户提供后端接口的描述、URL、请求头、请求体或响应体（特别是结构不够规范的 JSON）需要绑定到 UI，或者需要生成 TypeScript 类型声明或 JSDoc 声明时，必须触发此技能。
 ---
 

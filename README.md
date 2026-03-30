@@ -4,11 +4,25 @@
 
 ## 📥 如何接入与使用？
 
-如果你使用的是类似于 Google Gemini AI 或其他支持 `SKILL.md` 的智能体，可以通过以下简单的方式集成这套强大的开发工作流：
-
 ### 1. 本地导入
-1. Clone 或下载本仓库。
-2. 将特定的 skill 文件夹（例如 `react-taro-figma-ui` 或 `interface-integration`）复制到你本地的 AI Agent 配置读取目录（例如 macOS 上的 `~/.gemini/antigravity/skills/` 或者是其他代理的技能文件夹中）。
+
+Clone 或下载本仓库，将所需的 skill 文件夹复制到对应 AI Agent 的技能目录。不同平台的路径如下：
+
+| 平台 | 技能目录路径 |
+|------|------------|
+| **Accio** | `~/.accio/accounts/{accountId}/agents/{agentId}/agent-core/skills/` |
+| **Google Gemini Antigravity** | `~/.gemini/antigravity/skills/` |
+| **Claude Code** | `.claude/skills/`（项目根目录）或 `~/.claude/skills/`（全局） |
+
+**Accio 平台示例：**
+```bash
+# 将 skill 复制到 Accio Agent 技能目录
+cp -r skills/react-taro-figma-ui ~/.accio/accounts/<你的AccountId>/agents/<你的AgentId>/agent-core/skills/
+```
+
+复制后**无需重启**，Agent 会在下次对话时自动加载新 skill。
+
+> **注意（react-taro-figma-ui）**：此 skill 依赖 Figma MCP 服务。使用前请确保已在 Agent 中配置并启用 `figma-developer-mcp`（或其他兼容的 Figma MCP 工具），否则无法调用设计数据。
 
 ### 2. 触发与对答
 这些技能会自动成为 AI 助手的后台增强知识库，你**不再需要输入大段带有架构限制的Prompt**，只需在普通的对话中自然带有触发点：
