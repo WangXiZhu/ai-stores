@@ -32,15 +32,38 @@ def run_futu_script(script_name: str, code: str, extra_args: str = "") -> Option
     script_path = f"{FUTU_SCRIPTS}/{script_name}"
     cmd = f"{PYTHON_BIN} {script_path} {code} {extra_args} --json 2>&1"
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    for line in result.stdout.split("\n"):
-        line = line.strip()
-        if line.startswith("{") and line.endswith("}"):
-            try:
-                return json.loads(line)
-            except Exception:
-                pass
+    # Futu API 输出包含日志信息，需要提取纯 JSON
+    output = result.stdout
+    
+    # 找到第一个 { 和最后一个 } 来提取 JSON
+    start_idx = output.find("{")
+    end_idx = output.rfind("}")
+    
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        json_str = output[start_idx:end_idx + 1]
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            # 尝试逐行解析
+            for line in output.split("\n"):
+                line = line.strip()
+                if line.startswith("{"):
+                    try:
+                        # 处理可能被截断的 JSON
+                        brace_count = 0
+                        json_candidate = ""
+                        for char in line:
+                            json_candidate += char
+                            if char == "{":
+                                brace_count += 1
+                            elif char == "}":
+                                brace_count -= 1
+                            if brace_count == 0 and json_candidate.startswith("{"):
+                                return json.loads(json_candidate)
+                    except Exception:
+                        pass
+    
     return None
-
 
 def get_snapshot(code: str) -> Optional[Dict]:
     return run_futu_script("quote/get_snapshot.py", code)
