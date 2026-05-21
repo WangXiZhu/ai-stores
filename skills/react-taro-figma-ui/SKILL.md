@@ -1,60 +1,150 @@
 ---
 name: figma-ui
-description: 视觉1:1还原助手。根据开发者提供的 Figma 链接，通过 Figma MCP 工具解析原始数据，直接转换为 React (Web) 或 Taro (小程序) + SCSS 高保真代码。当用户提供 Figma 链接/节点要求写前端页面或组件时，必须触发此技能。
+description: Figma 高保真还原专家。根据 Figma 链接解析设计数据，生成 React(Web) 或 Taro + SCSS 代码，支持自动化与降级处理。
 ---
 
-# Figma 高保真 UI 还原专家
+# Figma UI 还原专家（工程化版）
 
-你是一位精通 Figma 原始数据解析与 React 前端架构（熟练掌握 Web 端 HTML 规范与 Taro 小程序框架）的研发专家。你的核心目标是将 Figma 设计稿转换成高质量、高保真、解耦且符合项目规范的前端代码。
+---
 
-## 前置条件 (Prerequisites)
+# 一、前置条件检查
 
-在执行任何还原任务之前，**必须先确认以下条件满足**：
+必须依次检查：
 
-1. **Figma MCP 工具可用**：检查 `get_design_context` 或 `get_metadata` 等 Figma MCP 工具是否已连接并可调用。
-   - 如果工具不可用，请告知用户：需要在 AI Agent 中启用 Figma MCP 服务（如 `figma-developer-mcp`），并重启客户端后重试。
-2. **Figma 链接格式正确**：用户提供的 Figma 链接必须包含 `fileKey` 和 `node-id`，标准格式为：
-   ```
-   https://www.figma.com/design/:fileKey/:fileName?node-id=1-2
-   ```
-   - `:fileKey`：文件唯一标识符（URL 路径第三段）
-   - `node-id`：目标节点 ID（query 参数，如 `34591-111061` 或 `34591:111061`）
-   - 如果用户未提供 `node-id`，请明确要求用户在 Figma 中选中目标节点后复制完整链接。
-3. **目标端环境已知**：明确当前要生成的是 **Web 端**（`div/span/img`）还是**小程序 Taro 端**（`View/Text/Image`）代码，不清楚时主动询问。
+1. MCP 工具是否可用
+2. Figma URL 是否包含 fileKey + node-id
+3. 目标端（Web / Taro）
 
-## 执行流程
+---
 
-在处理用户的 Figma 链接和还原请求时，**必须严格按照以下两步执行，切不可跨越步骤**：
+# 二、执行流程
 
-### 第一步：提取布局 DSL (Schema Extraction)
-**请先绝对不要编写任何 UI 视图代码！**
+## Step 1：DSL 提取（禁止生成代码）
 
-1. **提取 URL**：解析用户提供的 Figma 链接，利用 `get_design_context` 或 `get_metadata` MCP 工具读取目标设计节点。
-2. **确认目标端（最关键）**：你需要主动判断或询问用户当前要还原的代码目标环境。
-   - **小程序 (Taro)**：采用 `View`, `Text`, `Image` 等组件。
-   - **Web 端**：采用 `div`, `span`, `img` 等原生 HTML 标签。
-3. **输出精简 JSON DSL**，必须包含以下核心设计标记：
-   - **Layout**: 提取 Auto Layout 的方向 (direction)、内边距 (padding)、元素间距 (itemSpacing)、对齐方式 (alignment)。
-   - **Sizing**: 明确容器和元素的 width/height 模式：是 Fixed (固定像素), Hug (适应内容), 还是 Fill/Stretch (充满容器)。
-   - **Styles**: 提取精确的原始 Hex 色值、Font-size、Line-height、Font-weight、Border-radius, 以及阴影 (box-shadow) 属性。
-   - **Hierarchy**: 梳理并输出保持原始设计逻辑的图层树嵌套层级。
+输出结构必须如下：
 
-**🛑 强制暂停点：**
-生成以上 DSL JSON 并明确运行环境（Web 或 Taro）之后，你必须**停止所有的思考和执行动作，并向用户输出：“请确认 DSL 布局提取以及目标端（Web/小程序）无误，是否继续生成代码？”**
-必须等待用户明确回复（如“继续”或“确认”）后，才能进入第二步。
+```json
+{
+  "env": "web | taro",
+  "dsl": {}
+}
+````
 
-### 第二步：代码生成约束 (Code Generation)
-获得用户授权后，遵循以下架构标准和框架生成代码：
+DSL 结构必须符合：
 
-1. **框架规范约束 (根据第一步确定的目标端隔离)**：
-   - **若是小程序 (Taro)**：代码必须严格使用 Taro 框架规范，不能出现原生 HTML 标签。
-   - **若是 Web 端**：代码必须严格使用 React + HTML 原生标签语义化。
-2. **样式隔离与原子化对齐**：
-   - 样式文件命名和使用**必须采用 `*.module.scss` 规范**。
-   - 避免使用 Tailwind 等内联原子类。如果是新增文件，建立独立的 index.jsx 和 index.module.scss；如果是存量文件修改，则以追加的形式将 className 补充完整。
-3. **组件化与解耦逻辑**：
-   - 不要在单一文件中堆砌超过300行的巨型组件视图。
-   - 对于多次复用的设计区域（如卡片、列表项、导航头），应当根据其实际场景抽离为独立的 React 子组件。
-4. **静态资源处理与尺寸运算**：
-   - 若设计稿中包含图标、图片等静态资源（如 SVG、PNG），提取临时链接后，必须主动利用 `run_command` 等方式（例如通过 `curl` 命令）将远程物料下载，保存到对应页面目录内作为本地文件。**资源目录命名约束：**优先检查该页面目录下是否已存在 `assets` 文件夹，若存在，则新建带有当天日期的子文件夹（格式如 `assets/2026_03_09/`）将资源存入；若不存在，则直接创建 `assets`。代码中应引入这些本地包内的资源，禁止硬编码临时线上 HTTP 链接。
-   - **尺寸强制转换：** 在为小程序 (Taro) 端输出 SCSS 样式代码时，请务必将在第一步中抓取到所有的原始尺寸、间距、字体等 `px` 级数值**自动完整乘以 2 倍**再进行输出（Web 端无需乘 2）。
+```json
+{
+  "type": "container | text | image",
+  "layout": {
+    "direction": "horizontal | vertical",
+    "padding": [0,0,0,0],
+    "gap": 0,
+    "align": "start | center | end"
+  },
+  "size": {
+    "width": "fixed | fill | hug",
+    "height": "fixed | fill | hug"
+  },
+  "style": {
+    "background": "",
+    "fontSize": 0,
+    "color": ""
+  },
+  "children": []
+}
+```
+
+---
+
+## Step 2：代码生成
+
+无需再次确认，默认继续执行
+
+---
+
+# 三、代码生成规范
+
+## 1️⃣ 框架隔离
+
+* Web：React + HTML
+* Taro：View/Text/Image
+
+---
+
+## 2️⃣ 文件结构
+
+```
+index.jsx
+index.module.scss
+components/
+assets/
+```
+
+---
+
+## 3️⃣ 组件拆分规则
+
+必须拆分当：
+
+* 出现 ≥2 次
+* 独立 UI 语义（Card/ListItem/Header）
+
+---
+
+## 4️⃣ 样式规范
+
+* 优先使用 module.scss
+* 避免重复声明
+* 优先继承
+
+---
+
+## 5️⃣ 资源处理
+
+优先下载资源：
+
+```
+assets/yyyy_mm_dd/
+```
+
+若失败：
+
+```
+TODO: 使用远程资源
+```
+
+---
+
+## 6️⃣ 尺寸规则
+
+* Taro：px × 2
+* Web：保持原值
+
+---
+
+# 四、异常兜底
+
+## MCP 不可用
+
+降级策略：
+
+1. 使用截图/描述推断 UI
+2. 输出低保真结构
+
+---
+
+# 五、命名规范
+
+* container / header / card / list-item
+* 禁止 box1 / div1
+
+---
+
+# 六、执行原则
+
+1. 先 DSL，后代码
+2. 自动执行，不阻塞
+3. 最小合理拆分
+4. 保证可运行
+
+```
