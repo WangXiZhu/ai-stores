@@ -1,0 +1,27 @@
+{
+  "name": "course-local-reader",
+  "version": "1.0.0",
+  "description": "已登录在线课程抓取与本地阅读站构建技能。适用于导出课程正文、保存 Markdown、整理目录树、生成中英对照本地阅读页等场景。",
+  "author": "OpenAI Codex",
+  "keywords": [
+    "course",
+    "skilljar",
+    "reader",
+    "markdown",
+    "translation",
+    "browser",
+    "local-site"
+  ],
+  "entry": "SKILL.md",
+  "license": "MIT",
+  "platforms": ["codex", "claude"],
+  "triggers": [
+    "抓取课程原文",
+    "保存课程为 markdown",
+    "生成本地阅读站",
+    "中英对照阅读",
+    "skilljar 课程",
+    "课程目录树",
+    "课程阅读顺序"
+  ]
+}
