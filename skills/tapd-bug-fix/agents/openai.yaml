@@ -1,0 +1,7 @@
+interface:
+  display_name: "TAPD Bug Fix"
+  short_description: "根据TAPD bug自动定位仓库并修复"
+  default_prompt: "Use $tapd-bug-fix to read a TAPD bug, route it to the correct repo, and implement the fix."
+
+policy:
+  allow_implicit_invocation: true
