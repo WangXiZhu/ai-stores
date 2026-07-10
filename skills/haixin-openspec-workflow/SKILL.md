@@ -25,6 +25,7 @@ description: >-
   test-cases.md              # 可选
   execution-state.yaml       # 工作流运行态
   verification.md            # 验证记录
+  release-plan.md            # 发布前计划
   deploy-report.md           # 部署记录
 ```
 
@@ -94,6 +95,7 @@ history:
 报告写回规则：
 
 - 测试、静态检查、E2E、Smoke 相关结果写入 `verification.md`。
+- 发布范围、发布顺序、前置条件、验证清单、回滚方案写入 `release-plan.md`。
 - Swan 合并、部署、构建、外部任务 ID 写入 `deploy-report.md`。
 - 需求确认、阻断解除、关键口径变化写入 `decisions.md` 或 `x-open-questions.md`。
 - release 总结写入 `release.md`。
@@ -157,6 +159,7 @@ resume    恢复已有任务：Swan running task、长轮询任务、已启动�
 | local_proxy | `local-api-proxy` | 本地 API 分流与联调 |
 | e2e | `playwright-harness-e2e` | Harness + Playwright 回归 |
 | stability_review | `frontend-stability` | 静态稳定性审查 |
+| release_plan | 本 skill | 生成发布计划：范围、顺序、前置条件、验证清单、回滚方案 |
 | deploy | `swan-deploy` | Swan 合并与部署 |
 | bugfix | `tapd-bug-fix` | TAPD 缺陷回流修复 |
 | release | 本 skill | 汇总交付、验证、部署、风险 |
@@ -202,6 +205,28 @@ resume    恢复已有任务：Swan running task、长轮询任务、已启动�
 - 写入/更新 `blockers[]`
 - 更新对应 stage 的 `status`、`last_error`、`next_action`
 - 不删除历史记录，追加到 `history[]`
+
+### release plan
+
+用户要求“生成发布计划 / 我要发布计划 / 发布前计划”时：
+
+1. 先输出 `Workflow Status` 固定状态块
+2. 读取 `meta.yaml`、`contract.yaml`、`verification.md`、`execution-state.yaml`
+3. 生成或更新 `release-plan.md`
+4. 发布计划必须至少包含：
+   - 发布目标：环境、目标状态、计划时间、负责人
+   - 发布范围：涉及仓库、分支、Swan 应用 / 服务、是否必发
+   - 发布顺序：前端/后端/配置的顺序和依赖
+   - 前置条件：验证结果、分支 push、阻断缺陷、配置/DB 变更
+   - 验证清单：Smoke、核心业务路径、接口回显、回归点
+   - 回滚方案：前端、后端、配置、数据的回滚方式
+   - 风险与人工确认项
+5. 更新 `execution-state.yaml`：
+   - `release_plan.status: done | needs_review`
+   - `release_plan.outputs` 包含 `release-plan.md`
+   - `deploy.inputs` 必须包含 `release-plan.md`
+   - `history[]` 追加发布计划生成记录
+6. 如果缺少分支、Swan 应用、发布时间、负责人等信息，不得编造；写入 `待补充`，并将 `release_plan.status` 标为 `needs_review`
 
 ## Required State Fields
 
